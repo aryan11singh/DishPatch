@@ -11,7 +11,9 @@ import streamlit as st
 
 DEFAULT_API_URL = "https://restaurant-agent-oarq.onrender.com/chat"
 
-st.set_page_config(page_title="DishPatch | AI Restaurant Order Agent", page_icon="🍽️", layout="centered")
+st.set_page_config(
+    page_title="DishPatch | AI Restaurant Order Agent", page_icon="🍽️", layout="centered"
+)
 
 if "thread_id" not in st.session_state:
     st.session_state.thread_id = str(uuid.uuid4())
