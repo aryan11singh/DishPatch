@@ -1,0 +1,149 @@
+# DishPatch
+
+A stateful multi-turn AI restaurant ordering and kitchen lifecycle agent built with LangGraph, Groq, and FastAPI.
+
+## Overview
+
+**DishPatch** is an end-to-end intelligent restaurant ordering system built with LangGraph and Groq. It manages conversational state across multi-turn interactions using a FastAPI backend with MemorySaver, validates orders against real-time menu inventory, simulates kitchen preparation and delivery workflows, and provides an intuitive chat interface via Streamlit.
+
+---
+
+## Architecture Overview
+
+```mermaid
+graph TD
+    subgraph "Client Interface"
+    A[User Chat / Streamlit UI]
+    end
+
+    subgraph "FastAPI & Graph State"
+    B(FastAPI Endpoint) -->|MemorySaver| C{LangGraph State}
+    C --> D[LLM Brain Node]
+    end
+
+    subgraph "Agent Tool Nodes"
+    D -->|Check Inventory| E(Order Confirm Node)
+    D -->|Prepare Food| F(Cook Node)
+    D -->|Deliver Food| G(Serve Node)
+    end
+
+    subgraph "Failure Handling"
+    E -.->|Partial/Unavailable| D
+    F -.->|Cook Failed| D
+    G -.->|Serve Failed| D
+    end
+
+    classDef io fill:#f9f0ff,stroke:#8a2be2,stroke-width:2px,color:#000;
+    classDef core fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#000;
+    classDef logic fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#000;
+
+    class A io;
+    class B,C,D core;
+    class E,F,G logic;
+```
+
+---
+
+## Features
+
+| Component                       | Description                                                                                                                                  |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dynamic Order Extraction**    | Uses Groq's structured outputs via Pydantic to accurately parse dish names, quantities, and intent (e.g., ordering vs. unrelated chat).      |
+| **Stateful LangGraph Workflow** | Maintains strict conversational and order state using `MemorySaver`, allowing multi-turn conversations and human-in-the-loop confirmation.   |
+| **Inventory Verification**      | Dynamically checks requested items against a live menu dictionary. Handles partial orders by routing back to the user for approval.          |
+| **Fault-Tolerant Execution**    | Implements retries (3 order attempts, 2 cook attempts, 2 serve attempts) simulating real-world kitchen and serving failures. |
+| **Production Architecture**     | Fully containerized, with a FastAPI backend on Render and a Streamlit chat interface.                              |
+
+---
+
+## Technology Stack
+
+| Component            | Technologies                                |
+| :------------------- | :------------------------------------------ |
+| **Agent Framework**  | `LangGraph`, `LangChain`                    |
+| **LLM Inference**    | `Groq` (model: `openai/gpt-oss-120b`)       |
+| **Data Validation**  | `Pydantic`, `Pydantic-Settings`             |
+| **API & Backend**    | `FastAPI`, `Uvicorn`                        |
+| **Frontend UI**      | `Streamlit`                                 |
+| **Testing**          | `Pytest`                                    |
+| **Containerization** | `Docker`, `uv` (Fast Dependency Resolution) |
+
+---
+
+## Project Structure
+
+```text
+DishPatch/
+├── app/
+│   ├── __init__.py
+│   ├── config.py           # Environment & Settings
+│   ├── graph.py            # LangGraph Nodes & Edges
+│   ├── main.py             # FastAPI Application
+│   └── models.py           # Pydantic Schemas
+├── tests/
+│   ├── __init__.py
+│   └── test_scenarios.py   # Pytest Scenarios
+├── .env                    # Groq API Keys
+├── Dockerfile              # Container configuration
+├── render.yaml             # Render Blueprint IaC
+├── pyproject.toml          # UV Dependencies
+└── streamlit_app.py        # Streamlit Chat UI
+```
+
+---
+
+## Setup & Execution
+
+### 1. Environment Initialization
+
+```bash
+git clone https://github.com/aryan11singh/DishPatch.git
+cd DishPatch
+uv sync
+```
+
+### 2. Configure Environment Variables
+
+Create a `.env` file in the root directory and add your Groq API Key:
+
+```env
+GROQ_API_KEY=your_api_key_here
+```
+
+### 3. Run the Backend API
+
+```bash
+uv run uvicorn app.main:app --port 8000 --reload
+```
+
+The FastAPI swagger docs will be available at `http://127.0.0.1:8000/docs`.
+
+### 4. Run the Streamlit UI
+
+In a separate terminal, launch the chat interface:
+
+```bash
+uv run streamlit run streamlit_app.py
+```
+
+### 5. Run Tests
+
+```bash
+uv run pytest
+```
+
+---
+
+## Author
+
+**Aryan Singh**  
+- **Email:** [111aryansingh2004@gmail.com](mailto:111aryansingh2004@gmail.com)  
+- **GitHub:** [@aryan11singh](https://github.com/aryan11singh)
+
+---
+
+## License
+
+MIT - see [LICENSE](LICENSE).
+
+
